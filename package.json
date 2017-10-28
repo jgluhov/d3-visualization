@@ -1,0 +1,34 @@
+{
+  "name": "d3-visualization",
+  "version": "1.0.0",
+  "description": "Build interactive JavaScript Charts with D3 v4",
+  "main": "./src/app.js",
+  "scripts": {
+    "start": "./node_modules/.bin/webpack-dev-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgluhov/d3-visualization.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jgluhov/d3-visualization/issues"
+  },
+  "homepage": "https://github.com/jgluhov/d3-visualization#readme",
+  "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "d3": "^4.11.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "html-webpack-plugin": "^2.30.1",
+    "path": "^0.12.7",
+    "webpack": "^3.8.1"
+  }
+}

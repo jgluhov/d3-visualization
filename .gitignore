@@ -57,3 +57,9 @@ typings/
 # dotenv environment variables file
 .env
 
+# idea environement folfrt
+.idea/
+
+# public folder
+public/
+
