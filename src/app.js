@@ -19,23 +19,37 @@ const bar = select('.chart')
         .append('g')
         .attr('transform', (d, i) => `translate(0, ${i * 30})`);
 
+const scaleBar = (selection, scale) => {
+   selection.style('transform', `scaleX(${scale})`);
+};
+
+const fade = (selection, opacity) => {
+    selection.style('fill-opacity', opacity);
+};
+
+const setFill = (selection, color) => {
+    selection.style('fill', color);
+};
+
 bar.append('rect')
     .style('width', d => d.score * 30)
     .classed('bar', true)
     .on('mouseover', function(d, i, elements) {
         select(this)
-            .style('transform', 'scaleX(2)');
+            .call(scaleBar, 2);
 
         selectAll(elements)
             .filter(':not(:hover)')
-            .classed('barOn', true);
+            .call(fade, 0.5)
+            .call(setFill, 'coral');
     })
     .on('mouseout', function(d, i, elements) {
         select(this)
-            .style('transform', 'scaleX(1)');
+            .call(scaleBar, 1);
 
         selectAll(elements)
-            .classed('barOn', false);
+            .call(fade, 1)
+            .call(setFill, 'lightgreen');
     });
 
 bar.append('text')
