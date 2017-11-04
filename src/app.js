@@ -1,4 +1,4 @@
-import {select} from 'd3-selection';
+import {select, selectAll} from 'd3-selection';
 
 const scores = [
   { name: '1', score: 1 },
@@ -21,7 +21,22 @@ const bar = select('.chart')
 
 bar.append('rect')
     .style('width', d => d.score * 30)
-    .classed('bar', true);
+    .classed('bar', true)
+    .on('mouseover', function(d, i, elements) {
+        select(this)
+            .style('transform', 'scaleX(2)');
+
+        selectAll(elements)
+            .filter(':not(:hover)')
+            .classed('barOn', true);
+    })
+    .on('mouseout', function(d, i, elements) {
+        select(this)
+            .style('transform', 'scaleX(1)');
+
+        selectAll(elements)
+            .classed('barOn', false);
+    });
 
 bar.append('text')
     .attr('y', 20)
