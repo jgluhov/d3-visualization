@@ -20,7 +20,11 @@
   "homepage": "https://github.com/jgluhov/d3-visualization#readme",
   "dependencies": {
     "babel-runtime": "^6.26.0",
-    "d3": "^4.11.0"
+    "d3": "^4.11.0",
+    "d3-axis": "^1.0.8",
+    "d3-scale": "^1.0.6",
+    "d3-selection": "^1.1.0",
+    "d3-time": "^1.0.7"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

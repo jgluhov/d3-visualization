@@ -17,6 +17,7 @@ const svg = select('.chart')
     .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
+        .call(responsify)
     .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -31,7 +32,7 @@ const yScale = scaleLinear()
     .range([height, 0]);
 
 const yAxis = axisLeft(yScale)
-    .tickValues([0, 15, 18, 29]);
+    .ticks(10);
 
 svg.append('g')
     .call(yAxis);
@@ -51,3 +52,23 @@ const xAxis = axisBottom(xScale)
 svg.append('g')
     .attr('transform', `translate(0, ${height})`)
     .call(xAxis);
+
+function responsify(svg) {
+    const container = select(svg.node().parentNode),
+        width = parseInt(svg.style('width')),
+        height = parseInt(svg.style('height')),
+        aspect = width / height;
+
+    const resize = () => {
+        const targetWidth = parseInt(container.style('width'));
+
+        svg.attr('width', targetWidth);
+        svg.attr('height', Math.round(targetWidth / aspect));
+    };
+
+    svg.attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('preserveAspectRatio', 'xMinYMid')
+        .call(resize);
+
+    select(window).on(`resize.${container.attr('id')}`, resize);
+}
