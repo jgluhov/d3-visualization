@@ -1,12 +1,12 @@
 import { select } from 'd3-selection';
-import { scaleLinear, scaleTime, } from 'd3-scale';
+import { scaleLinear, scaleBand } from 'd3-scale';
 import { axisLeft, axisBottom } from 'd3-axis';
 import { timeMinute } from 'd3-time';
 
 const margin = {
     top: 5,
     right: 0,
-    bottom: 40,
+    bottom: 60,
     left: 30
 };
 
@@ -21,26 +21,36 @@ const svg = select('.chart')
     .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-svg.append('rect')
-    .attr('width', width)
-    .attr('height', height)
-    .style('fill', 'lightblue')
-    .style('stroke', 'green');
+const data = [
+    {score: 63, subject: 'Mathematics'},
+    {score: 82, subject: 'Geography'},
+    {score: 74, subject: 'Spelling'},
+    {score: 57, subject: 'Reading'},
+    {score: 52, subject: 'Science'}
+];
+
+const xScale = scaleBand()
+    .paddingInner(0.2)
+    .paddingOuter(0.1)
+    .domain(data.map(d => d.subject))
+    .range([0, width]);
 
 const yScale = scaleLinear()
     .domain([0, 100])
     .range([height, 0]);
 
+svg.selectAll('rect')
+    .data(data)
+    .enter()
+    .append('rect')
+    .attr('x',  d => xScale(d.subject))
+    .attr('y', d => yScale(d.score))
+    .attr('width', d => xScale.bandwidth())
+    .attr('height', d => height - yScale(d.score))
+    .style('fill', 'steelblue');
+
 const yAxis = axisLeft(yScale)
     .ticks(10);
-
-svg.append('g')
-    .call(yAxis);
-
-const xScale = scaleTime()
-    .domain([new Date(2017, 0, 1, 6), new Date(2017, 0, 1, 9)])
-    .range([0, width]);
-
 
 const xAxis = axisBottom(xScale)
     .ticks(timeMinute.every(60))
@@ -51,7 +61,16 @@ const xAxis = axisBottom(xScale)
 
 svg.append('g')
     .attr('transform', `translate(0, ${height})`)
-    .call(xAxis);
+    .call(xAxis)
+    .selectAll('text')
+        .style('text-anchor', 'end')
+        .style('transform', 'rotate(-45deg)');
+
+svg.append('g')
+    .call(yAxis)
+    .selectAll('text')
+        .style('text-anchor', 'end')
+        .style('transform', 'rotate(-45deg)');
 
 function responsify(svg) {
     const container = select(svg.node().parentNode),
