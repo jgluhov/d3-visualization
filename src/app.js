@@ -1,6 +1,10 @@
 import { select } from 'd3-selection';
-import { scaleLinear } from 'd3-scale';
+import { scaleLinear, scaleTime } from 'd3-scale';
+import { min, max } from 'd3-array';
 import { axisLeft, axisBottom } from 'd3-axis';
+import { json } from 'd3-request';
+import { timeParse } from 'd3-time-format'
+import { line, curveCatmullRom } from 'd3-shape';
 
 const margin = {
     top: 5,
@@ -20,25 +24,64 @@ const svg = select('.chart')
     .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-const yScale = scaleLinear()
-    .domain([0, 100])
-    .range([height, 0]);
+const colours = [
+    '#FF9900',
+    '#3369E8'
+];
 
-const yAxis = axisLeft(yScale);
+json('data/line-data.json', (err, data) => {
+    const parseTime = timeParse('%Y/%m/%d');
+    data.forEach(company => {
+        company.values.forEach(d => {
+            d.date = parseTime(d.date);
+            d.close = +d.close;
+        });
+    });
 
-svg.append('g')
-    .call(yAxis);
+    const xScale = scaleTime()
+        .domain([
+            min(data, co => min(co.values, d => d.date)),
+            max(data, co => max(co.values, d => d.date))
+        ])
+        .range([0, width]);
 
-const xScale = scaleLinear()
-    .domain([0, 100])
-    .range([0, width]);
+    const xAxis = axisBottom(xScale)
+        .ticks(5);
 
+    svg
+        .append('g')
+            .attr('transform', `translate(0, ${height})`)
+        .call(xAxis);
 
-const xAxis = axisBottom(xScale);
+    const yScale = scaleLinear()
+        .domain([
+            min(data, co => min(co.values, d => d.close)),
+            max(data, co => max(co.values, d => d.close))
+        ])
+        .range([height, 0]);
 
-svg.append('g')
-    .attr('transform', `translate(0, ${height})`)
-    .call(xAxis);
+    const yAxis = axisLeft(yScale);
+
+    svg
+        .append('g')
+        .call(yAxis);
+
+    const lineFn = line()
+        .x(d => xScale(d.date))
+        .y(d => yScale(d.close))
+        .curve(curveCatmullRom.alpha(0.5));
+
+    svg
+        .selectAll('.line')
+        .data(data)
+        .enter()
+        .append('path')
+        .attr('class', 'line')
+        .attr('d', d => lineFn(d.values))
+        .style('stroke', (d, i) => colours[i])
+        .style('stroke-width', 2)
+        .style('fill', 'none');
+});
 
 function responsify(svg) {
     const container = select(svg.node().parentNode),
