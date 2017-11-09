@@ -1,6 +1,11 @@
 import { select } from 'd3-selection';
-import { scaleLinear } from 'd3-scale';
+import { scaleLinear, scaleTime } from 'd3-scale';
 import { axisLeft, axisBottom } from 'd3-axis';
+import { area, curveCatmullRom } from 'd3-shape';
+import { json } from 'd3-request';
+import { timeParse } from 'd3-time-format';
+import { min, max } from 'd3-array';
+import responsify from './responsify';
 
 const margin = {
     top: 5,
@@ -20,42 +25,61 @@ const svg = select('.chart')
     .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-const yScale = scaleLinear()
-    .domain([0, 100])
-    .range([height, 0]);
+json('data/area-data.json', (err, data) => {
+    if (err) {
+        throw err;
+    }
 
-const yAxis = axisLeft(yScale);
+    const parseTime = timeParse('%Y/%m/%d');
 
-svg.append('g')
-    .call(yAxis);
+    data.forEach(company => {
+        company.values.forEach(d => {
+            d.date = parseTime(d.date);
+            d.close = +d.close;
+        });
+    });
 
-const xScale = scaleLinear()
-    .domain([0, 100])
-    .range([0, width]);
+    const xScale = scaleTime()
+        .domain([
+            min(data, co => min(co.values, d => d.date)),
+            max(data, co => max(co.values, d => d.date))
+        ])
+        .range([0, width]);
 
+    const xAxis = axisBottom(xScale)
+        .ticks(5);
 
-const xAxis = axisBottom(xScale);
+    const yScale = scaleLinear()
+        .domain([
+            min(data, co => min(co.values, d => d.close)),
+            max(data, co => max(co.values, d => d.close))
+        ])
+        .range([height, 0]);
 
-svg.append('g')
-    .attr('transform', `translate(0, ${height})`)
-    .call(xAxis);
+    const yAxis = axisLeft(yScale);
 
-function responsify(svg) {
-    const container = select(svg.node().parentNode),
-        width = parseInt(svg.style('width')),
-        height = parseInt(svg.style('height')),
-        aspect = width / height;
+    svg.append('g')
+        .attr('transform', `translate(0, ${height})`)
+        .call(xAxis);
 
-    const resize = () => {
-        const targetWidth = parseInt(container.style('width'));
+    svg.append('g')
+        .call(yAxis);
 
-        svg.attr('width', targetWidth);
-        svg.attr('height', Math.round(targetWidth / aspect));
-    };
+    const areaHandler = area()
+        .x(d => xScale(d.date))
+        .y0(yScale(yScale.domain()[0]))
+        .y1(d => yScale(d.close))
+        .curve(curveCatmullRom.alpha(0.5));
 
-    svg.attr('viewBox', `0 0 ${width} ${height}`)
-        .attr('preserveAspectRatio', 'xMinYMid')
-        .call(resize);
-
-    select(window).on(`resize.${container.attr('id')}`, resize);
-}
+    svg
+        .selectAll('.area')
+        .data(data)
+        .enter()
+        .append('path')
+        .attr('class', 'area')
+        .attr('d', d => areaHandler(d.values))
+        .style('stroke', (d, i) => ['#FF9900', '#3369E8'][i])
+        .style('stroke-width', 2)
+        .style('fill', (d, i) => ['#FF9900', '#3369E8'][i])
+        .style('fill-opacity', 0.5);
+});
