@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <title>D3 v4 - Build Interactive JavaScript Charts</title>
     <style>
-        #block {
+        .block {
             background-color: lightgray;
             border: 1px solid black;
             width: 100px;
             height: 100px;
+            margin-bottom: 2em;
         }
     </style>
 </head>
 <body>
-    <div id="block"></div>
+    <div class="block block--a"></div>
+    <div class="block block--b"></div>
+
+    <button onclick="go()">Go</button>
+    <button onclick="goNow()">Go now</button>
 </body>
 </html>
